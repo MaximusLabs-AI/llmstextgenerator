@@ -1,5 +1,8 @@
 # LLMs.txt Generator: GEO-First Documentation Engine
 
+[![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen)](https://www.maximuslabs.ai/tools/llms-txt-generator)
+[![GitHub Repository](https://img.shields.io/badge/GitHub-Repository-blue)](https://github.com/MaximusLabs-AI/llmstextgenerator)
+
 A professional-grade backend and frontend system designed to crawl websites and generate technically precise `llms.txt` files following the official specification from [llmstxt.org](https://llmstxt.org/). This tool optimizes your site's visibility for Generative Engine Optimization (GEO) and Answer Engine Optimization (AEO).
 
 ## Features
