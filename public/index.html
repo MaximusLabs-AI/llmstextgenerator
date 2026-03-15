@@ -1,0 +1,879 @@
+<meta charset="UTF-8">
+<div id="ml-tool-llms-generator" class="ml-tool-wrapper">
+    <style>
+        /* SCOPED RESET */
+        #ml-tool-llms-generator,
+        #ml-tool-llms-generator *,
+        #ml-tool-llms-generator *::before,
+        #ml-tool-llms-generator *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Satoshi Font - Standard for MaximusLabs */
+        @font-face {
+            font-family: 'Satoshi';
+            src: url('https://api.fontshare.com/v2/css?f[]=satoshi@700,500,400&display=swap');
+        }
+
+        #ml-tool-llms-generator {
+            max-width: 780px;
+            margin: 2rem auto;
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid rgba(30, 50, 81, 0.12);
+            box-shadow: 0 4px 24px rgba(0, 28, 100, 0.08);
+            font-family: 'Satoshi', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            color: #333;
+            line-height: 1.5;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #ml-tool-llms-generator .ml-tool-header {
+            background: linear-gradient(192deg, #001435 30%, #003087);
+            padding: 28px 32px 24px;
+            color: #fff;
+        }
+
+        #ml-tool-llms-generator .ml-tool-badge {
+            display: inline-block;
+            font-size: 0.6875rem;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            background: #449afb;
+            padding: 4px 12px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            color: #fff;
+        }
+
+        #ml-tool-llms-generator .ml-tool-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        #ml-tool-llms-generator .ml-tool-subtitle {
+            font-size: 0.9375rem;
+            font-weight: 400;
+            opacity: 0.9;
+            color: #fff;
+            max-width: 600px;
+        }
+
+        #ml-tool-llms-generator .ml-tool-content {
+            padding: 32px;
+        }
+
+        /* INPUTS */
+        #ml-tool-llms-generator .ml-tool-field-group {
+            margin-bottom: 24px;
+        }
+
+        #ml-tool-llms-generator .ml-tool-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #1e3251;
+            margin-bottom: 8px;
+        }
+
+        #ml-tool-llms-generator .ml-tool-input-wrapper {
+            display: flex;
+            gap: 12px;
+        }
+
+        #ml-tool-llms-generator .ml-tool-input {
+            width: 100%;
+            padding: 12px 16px;
+            font-family: inherit;
+            font-size: 0.9375rem;
+            font-weight: 400;
+            color: #333;
+            background: #fff;
+            border: 1px solid #e2e2e2;
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        #ml-tool-llms-generator .ml-tool-input:focus {
+            border-color: #0070e0;
+            box-shadow: 0 0 0 3px rgba(0, 112, 224, 0.2);
+        }
+
+        /* BUTTONS */
+        #ml-tool-llms-generator .ml-tool-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 28px;
+            font-family: inherit;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #fff;
+            background: linear-gradient(135deg, #001c64, #003087);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 28, 100, 0.15);
+            transition: all 0.2s cubic-bezier(.77,0,.175,1);
+            white-space: nowrap;
+        }
+
+        #ml-tool-llms-generator .ml-tool-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #002d7a, #0070e0);
+            box-shadow: 0 4px 16px rgba(0, 28, 100, 0.25);
+            transform: translateY(-1px);
+        }
+
+        #ml-tool-llms-generator .ml-tool-btn:active:not(:disabled) {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 28, 100, 0.15);
+        }
+
+        #ml-tool-llms-generator .ml-tool-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        #ml-tool-llms-generator .ml-tool-btn-secondary {
+            background: #fff;
+            color: #003087;
+            border: 1.5px solid #e2e2e2;
+            box-shadow: none;
+        }
+
+        #ml-tool-llms-generator .ml-tool-btn-secondary:hover:not(:disabled) {
+            background: #f3f3f6;
+            border-color: #003087;
+            transform: none;
+            box-shadow: none;
+        }
+
+        #ml-tool-llms-generator .ml-tool-btn-danger {
+            background: #c0392b;
+            box-shadow: 0 2px 8px rgba(192, 57, 43, 0.2);
+        }
+        
+        #ml-tool-llms-generator .ml-tool-btn-danger:hover:not(:disabled) {
+            background: #e74c3c;
+            box-shadow: 0 4px 16px rgba(192, 57, 43, 0.3);
+        }
+
+        /* ADVANCED OPTIONS */
+        #ml-tool-llms-generator .ml-tool-advanced-toggle {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: transparent;
+            border: none;
+            color: #003087;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 8px 0;
+            margin-bottom: 16px;
+            transition: opacity 0.2s;
+        }
+
+        #ml-tool-llms-generator .ml-tool-advanced-toggle:hover {
+            opacity: 0.8;
+        }
+
+        #ml-tool-llms-generator .ml-tool-advanced-toggle svg {
+            transition: transform 0.2s;
+        }
+
+        #ml-tool-llms-generator .ml-tool-advanced-toggle.active svg {
+            transform: rotate(90deg);
+        }
+
+        #ml-tool-llms-generator .ml-tool-advanced-panel {
+            background: #f3f3f6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 24px;
+            display: none;
+        }
+
+        #ml-tool-llms-generator .ml-tool-advanced-panel.show {
+            display: block;
+            animation: ml-tool-fade-in 0.3s ease;
+        }
+
+        #ml-tool-llms-generator .ml-tool-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        #ml-tool-llms-generator .ml-tool-sub-label {
+            display: block;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 6px;
+        }
+
+        #ml-tool-llms-generator .ml-tool-hint {
+            font-size: 0.75rem;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        /* SLIDER */
+        #ml-tool-llms-generator .ml-tool-slider-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        #ml-tool-llms-generator .ml-tool-range {
+            flex-grow: 1;
+            height: 6px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #e2e2e2;
+            border-radius: 3px;
+            outline: none;
+        }
+
+        #ml-tool-llms-generator .ml-tool-range::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            border: 2px solid #0070e0;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+        }
+
+        #ml-tool-llms-generator .ml-tool-range-value {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #001c64;
+            min-width: 80px;
+        }
+
+        /* CHECKBOX */
+        #ml-tool-llms-generator .ml-tool-checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        #ml-tool-llms-generator .ml-tool-checkbox {
+            width: 18px;
+            height: 18px;
+            border: 1.5px solid #e2e2e2;
+            border-radius: 4px;
+            margin-top: 2px;
+        }
+
+        /* LOADING SECTION */
+        #ml-tool-llms-generator .ml-tool-loading {
+            display: none;
+            text-align: center;
+            padding: 40px 0;
+        }
+
+        #ml-tool-llms-generator .ml-tool-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f3f3f6;
+            border-top: 3px solid #0070e0;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            animation: ml-tool-spin 0.8s linear infinite;
+        }
+
+        #ml-tool-llms-generator .ml-tool-steps {
+            max-width: 320px;
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        #ml-tool-llms-generator .ml-tool-step {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.875rem;
+            color: #666;
+            margin-bottom: 12px;
+            opacity: 0.5;
+            transition: opacity 0.3s;
+        }
+
+        #ml-tool-llms-generator .ml-tool-step.active {
+            opacity: 1;
+            color: #001c64;
+            font-weight: 600;
+        }
+
+        #ml-tool-llms-generator .ml-tool-step.complete {
+            opacity: 1;
+            color: #34d399;
+        }
+
+        #ml-tool-llms-generator .ml-tool-step-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #e2e2e2;
+        }
+
+        #ml-tool-llms-generator .ml-tool-step.active .ml-tool-step-dot {
+            background: #0070e0;
+            box-shadow: 0 0 0 3px rgba(0, 112, 224, 0.2);
+        }
+
+        #ml-tool-llms-generator .ml-tool-step.complete .ml-tool-step-dot {
+            background: #34d399;
+        }
+
+        /* RESULTS SECTION */
+        #ml-tool-llms-generator .ml-tool-results {
+            display: none;
+        }
+
+        #ml-tool-llms-generator .ml-tool-results.show {
+            display: block;
+        }
+
+        #ml-tool-llms-generator .ml-tool-results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            animation: ml-tool-fade-in 0.4s ease forwards;
+        }
+
+        #ml-tool-llms-generator .ml-tool-results-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #001c64;
+        }
+
+        #ml-tool-llms-generator .ml-tool-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        #ml-tool-llms-generator .ml-tool-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        #ml-tool-llms-generator .ml-tool-stat-card {
+            background: #f3f3f6;
+            border: 1px solid #e2e2e2;
+            border-radius: 8px;
+            padding: 16px 12px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(8px);
+        }
+
+        #ml-tool-llms-generator .ml-tool-results.show .ml-tool-stat-card {
+            animation: ml-tool-fade-in 0.35s ease forwards;
+        }
+
+        #ml-tool-llms-generator .ml-tool-stat-card:nth-child(1) { animation-delay: 0.1s; }
+        #ml-tool-llms-generator .ml-tool-stat-card:nth-child(2) { animation-delay: 0.18s; }
+        #ml-tool-llms-generator .ml-tool-stat-card:nth-child(3) { animation-delay: 0.26s; }
+        #ml-tool-llms-generator .ml-tool-stat-card:nth-child(4) { animation-delay: 0.34s; }
+
+        #ml-tool-llms-generator .ml-tool-stat-value {
+            display: block;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #001c64;
+            margin-bottom: 4px;
+        }
+
+        #ml-tool-llms-generator .ml-tool-stat-label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        #ml-tool-llms-generator .ml-tool-code-box {
+            position: relative;
+            background: #101011;
+            border-radius: 8px;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(12px);
+        }
+
+        #ml-tool-llms-generator .ml-tool-results.show .ml-tool-code-box {
+            animation: ml-tool-fade-in 0.4s ease 0.45s forwards;
+        }
+
+        #ml-tool-llms-generator .ml-tool-textarea {
+            width: 100%;
+            height: 320px;
+            background: transparent;
+            border: none;
+            color: #d1d1d1;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 0.875rem;
+            padding: 20px;
+            resize: none;
+            outline: none;
+            line-height: 1.5;
+        }
+
+        /* ERROR CALLOUT */
+        #ml-tool-llms-generator .ml-tool-error {
+            display: none;
+            background: #c0392b10;
+            border-left: 4px solid #c0392b;
+            padding: 16px;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 24px;
+            color: #c0392b;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        /* FOOTER */
+        #ml-tool-llms-generator .ml-tool-footer {
+            padding: 16px 32px;
+            background: #f3f3f6;
+            border-top: 1px solid #e2e2e2;
+            font-size: 0.75rem;
+            color: rgba(30, 50, 81, 0.5);
+            text-align: center;
+        }
+
+        #ml-tool-llms-generator .ml-tool-footer a {
+            color: #003087;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        #ml-tool-llms-generator .ml-tool-footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* ANIMATIONS */
+        @keyframes ml-tool-spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes ml-tool-fade-in {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes ml-tool-slide-up {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            #ml-tool-llms-generator {
+                margin: 0;
+                border-radius: 0;
+                max-width: 100%;
+            }
+
+            #ml-tool-llms-generator .ml-tool-grid {
+                grid-template-columns: 1fr;
+            }
+
+            #ml-tool-llms-generator .ml-tool-input-wrapper {
+                flex-direction: column;
+            }
+
+            #ml-tool-llms-generator .ml-tool-btn {
+                width: 100%;
+            }
+
+            #ml-tool-llms-generator .ml-tool-results-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+
+            #ml-tool-llms-generator .ml-tool-actions {
+                width: 100%;
+            }
+
+            #ml-tool-llms-generator .ml-tool-actions .ml-tool-btn {
+                flex: 1;
+            }
+        }
+    </style>
+
+    <div class="ml-tool-header">
+        <span class="ml-tool-badge">Free Generator</span>
+        <h1 class="ml-tool-title">LLMs.txt Generator</h1>
+        <p class="ml-tool-subtitle">Build an LLM-friendly documentation map for your site. Optimize for AI search, Gemini, ChatGPT, and Perplexity discovery.</p>
+    </div>
+
+    <div class="ml-tool-content">
+        <!-- Error Message -->
+        <div id="ml-tool-error" class="ml-tool-error"></div>
+
+        <!-- Input Section -->
+        <div id="ml-tool-input-section">
+            <div class="ml-tool-field-group">
+                <label for="ml-tool-url" class="ml-tool-label">TARGET DOMAIN</label>
+                <div class="ml-tool-input-wrapper">
+                    <input type="url" id="ml-tool-url" class="ml-tool-input" placeholder="https://example.com" aria-label="Target Domain" required>
+                    <button id="ml-tool-generate-btn" class="ml-tool-btn">
+                        <span>Deploy Generator</span>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1 8H15M15 8L8 1M15 8L8 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <button id="ml-tool-cancel-btn" class="ml-tool-btn ml-tool-btn-danger" style="display: none;">Cancel</button>
+                </div>
+            </div>
+
+            <button type="button" id="ml-tool-advanced-toggle" class="ml-tool-advanced-toggle">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 2L8 6L4 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Advanced Crawl Options
+            </button>
+
+            <div id="ml-tool-advanced-panel" class="ml-tool-advanced-panel">
+                <div class="ml-tool-grid">
+                    <div class="ml-tool-field-group">
+                        <label class="ml-tool-sub-label">Crawl Depth</label>
+                        <div class="ml-tool-slider-container">
+                            <input type="range" id="ml-tool-crawl-depth" min="1" max="5" value="1" class="ml-tool-range">
+                            <span id="ml-tool-depth-value" class="ml-tool-range-value">1 (Shallow)</span>
+                        </div>
+                        <p class="ml-tool-hint">Level 1 = homepage + sitemap only.</p>
+                    </div>
+
+                    <div class="ml-tool-field-group">
+                        <label for="ml-tool-max-pages" class="ml-tool-sub-label">Max Pages</label>
+                        <input type="number" id="ml-tool-max-pages" min="10" max="200" value="100" class="ml-tool-input">
+                        <p class="ml-tool-hint">Limit discovery to N pages.</p>
+                    </div>
+
+                    <div class="ml-tool-field-group">
+                        <label for="ml-tool-allow-paths" class="ml-tool-sub-label">Allow Paths</label>
+                        <input type="text" id="ml-tool-allow-paths" placeholder="e.g. /blog, /docs" class="ml-tool-input">
+                        <p class="ml-tool-hint">Comma-separated prefixes.</p>
+                    </div>
+
+                    <div class="ml-tool-field-group" style="display: flex; align-items: center; height: 100%; padding-top: 24px;">
+                        <label class="ml-tool-checkbox-group">
+                            <input type="checkbox" id="ml-tool-force-playwright">
+                            <span style="font-size: 0.875rem; font-weight: 500;">Force Browser Rendering</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Section -->
+        <div id="ml-tool-loading-section" class="ml-tool-loading">
+            <div class="ml-tool-spinner"></div>
+            <div class="ml-tool-steps">
+                <div class="ml-tool-step" data-step="1">
+                    <div class="ml-tool-step-dot"></div>
+                    <span>Initializing Crawler...</span>
+                </div>
+                <div class="ml-tool-step" data-step="2">
+                    <div class="ml-tool-step-dot"></div>
+                    <span>Extracting Semantic Map...</span>
+                </div>
+                <div class="ml-tool-step" data-step="3">
+                    <div class="ml-tool-step-dot"></div>
+                    <span>Analyzing Architecture...</span>
+                </div>
+                <div class="ml-tool-step" data-step="4">
+                    <div class="ml-tool-step-dot"></div>
+                    <span>Generating llms.txt...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="ml-tool-results-section" class="ml-tool-results">
+            <div class="ml-tool-results-header">
+                <h2 class="ml-tool-results-title">File Generated</h2>
+                <div class="ml-tool-actions">
+                    <button id="ml-tool-copy-btn" class="ml-tool-btn ml-tool-btn-secondary">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5.5 1.5H11.5L14.5 4.5V14.5H5.5V1.5Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M1.5 5.5V10.5C1.5 11.6046 2.39543 12.5 3.5 12.5H3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Copy
+                    </button>
+                    <button id="ml-tool-download-btn" class="ml-tool-btn ml-tool-btn-secondary">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M8 11V1M8 11L4 7M8 11L12 7M1 15H15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Download
+                    </button>
+                </div>
+            </div>
+
+            <div id="ml-tool-stats" class="ml-tool-stats-grid">
+                <div class="ml-tool-stat-card">
+                    <span id="ml-tool-stat-discovered" class="ml-tool-stat-value">0</span>
+                    <span class="ml-tool-stat-label">Discovered</span>
+                </div>
+                <div class="ml-tool-stat-card">
+                    <span id="ml-tool-stat-analyzed" class="ml-tool-stat-value">0</span>
+                    <span class="ml-tool-stat-label">Analyzed</span>
+                </div>
+                <div class="ml-tool-stat-card">
+                    <span id="ml-tool-stat-depth" class="ml-tool-stat-value">1</span>
+                    <span class="ml-tool-stat-label">Crawl Depth</span>
+                </div>
+                <div class="ml-tool-stat-card">
+                    <span id="ml-tool-stat-logic" class="ml-tool-stat-value">AI</span>
+                    <span class="ml-tool-stat-label">Engine</span>
+                </div>
+            </div>
+
+            <div class="ml-tool-code-box">
+                <textarea id="ml-tool-output" class="ml-tool-textarea" readonly></textarea>
+            </div>
+        </div>
+    </div>
+
+    <div class="ml-tool-footer">
+        Powered by <a href="https://maximuslabs.ai" target="_blank" rel="noopener">MaximusLabs AI</a> &middot; GEO-First Web Engine
+    </div>
+
+    <script>
+        (function() {
+            var root = document.getElementById('ml-tool-llms-generator');
+            if (!root) return;
+
+            // Selectors
+            var generateBtn = root.querySelector('#ml-tool-generate-btn');
+            var cancelBtn = root.querySelector('#ml-tool-cancel-btn');
+            var urlInput = root.querySelector('#ml-tool-url');
+            var loadingSection = root.querySelector('#ml-tool-loading-section');
+            var inputSection = root.querySelector('#ml-tool-input-section');
+            var resultsSection = root.querySelector('#ml-tool-results-section');
+            var errorCallout = root.querySelector('#ml-tool-error');
+            var outputDisplay = root.querySelector('#ml-tool-output');
+            var steps = root.querySelectorAll('.ml-tool-step');
+            
+            var advancedToggle = root.querySelector('#ml-tool-advanced-toggle');
+            var advancedPanel = root.querySelector('#ml-tool-advanced-panel');
+            var depthSlider = root.querySelector('#ml-tool-crawl-depth');
+            var depthLabel = root.querySelector('#ml-tool-depth-value');
+            
+            var copyBtn = root.querySelector('#ml-tool-copy-btn');
+            var downloadBtn = root.querySelector('#ml-tool-download-btn');
+            
+            var statDiscovered = root.querySelector('#ml-tool-stat-discovered');
+            var statAnalyzed = root.querySelector('#ml-tool-stat-analyzed');
+            var statDepth = root.querySelector('#ml-tool-stat-depth');
+            var statLogic = root.querySelector('#ml-tool-stat-logic');
+
+            var currentAbortController = null;
+            var depthLabels = { 1: "1 (Shallow)", 2: "2 (Standard)", 3: "3 (Deep)", 4: "4 (Very Deep)", 5: "5 (Maximum)" };
+
+            // -- Toggle Advanced --
+            advancedToggle.addEventListener('click', function() {
+                var isOpen = advancedPanel.classList.toggle('show');
+                advancedToggle.classList.toggle('active', isOpen);
+            });
+
+            depthSlider.addEventListener('input', function() {
+                depthLabel.textContent = depthLabels[depthSlider.value] || depthSlider.value;
+            });
+
+            // -- Helper: Update Steps --
+            function updateStep(index, status) {
+                if (steps[index - 1]) {
+                    steps[index - 1].className = 'ml-tool-step ' + status;
+                }
+            }
+
+            // -- Main Generate --
+            generateBtn.addEventListener('click', async function() {
+                var rawUrl = urlInput.value.trim();
+                if (!rawUrl) {
+                    urlInput.focus();
+                    return;
+                }
+
+                // Normalization
+                if (!rawUrl.startsWith('http://') && !rawUrl.startsWith('https://')) {
+                    rawUrl = 'https://' + rawUrl;
+                }
+                try {
+                    var parsed = new URL(rawUrl);
+                    urlInput.value = parsed.origin;
+                    rawUrl = parsed.origin;
+                } catch (e) {
+                    showError("Please enter a valid target domain.");
+                    return;
+                }
+
+                // Reset UI
+                hideError();
+                resultsSection.classList.remove('show');
+                resultsSection.style.display = 'none';
+                loadingSection.style.display = 'block';
+                generateBtn.style.display = 'none';
+                cancelBtn.style.display = 'inline-flex';
+                steps.forEach(s => s.className = 'ml-tool-step');
+
+                updateStep(1, 'active');
+                
+                // Visual progress mock
+                var visualStep = 1;
+                var stepInterval = setInterval(function() {
+                    if (visualStep < 4) {
+                        updateStep(visualStep, 'complete');
+                        visualStep++;
+                        updateStep(visualStep, 'active');
+                    }
+                }, 3500);
+
+                // Options
+                var body = { url: rawUrl };
+                var depth = parseInt(depthSlider.value, 10);
+                if (depth > 1) body.crawlDepth = depth;
+                
+                var maxPages = parseInt(root.querySelector('#ml-tool-max-pages').value, 10);
+                if (maxPages && maxPages !== 100) body.maxPages = maxPages;
+                
+                var allowPaths = root.querySelector('#ml-tool-allow-paths').value
+                    .split(',')
+                    .map(s => s.trim())
+                    .filter(Boolean);
+                if (allowPaths.length > 0) body.allowPaths = allowPaths;
+                
+                if (root.querySelector('#ml-tool-force-playwright').checked) body.forcePlaywright = true;
+
+                currentAbortController = new AbortController();
+                var timeoutId = setTimeout(() => currentAbortController.abort(), 180000);
+
+                try {
+                    var response = await fetch('/api/generate-llms-txt', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body),
+                        signal: currentAbortController.signal
+                    });
+
+                    clearTimeout(timeoutId);
+                    clearInterval(stepInterval);
+
+                    if (!response.ok) {
+                        var errData = await response.json();
+                        throw new Error(errData.error || 'Server error');
+                    }
+
+                    var data = await response.json();
+                    
+                    // Success
+                    for(var i=1; i<=4; i++) updateStep(i, 'complete');
+                    
+                    animateNumber(statDiscovered, data.meta.pagesDiscovered);
+                    animateNumber(statAnalyzed, data.meta.pagesAnalyzed);
+                    statDepth.textContent = data.meta.crawlDepth || 1;
+                    statLogic.textContent = data.meta.usedLLM ? 'AI' : 'Rules';
+                    
+                    outputDisplay.value = data.llmsTxt;
+                    loadingSection.style.display = 'none';
+                    resultsSection.style.display = 'block';
+                    setTimeout(() => resultsSection.classList.add('show'), 10);
+                    
+                } catch (err) {
+                    clearInterval(stepInterval);
+                    loadingSection.style.display = 'none';
+                    if (err.name === 'AbortError') {
+                        showError("Operation cancelled or timed out.");
+                    } else {
+                        showError(err.message);
+                    }
+                } finally {
+                    generateBtn.style.display = 'inline-flex';
+                    cancelBtn.style.display = 'none';
+                    currentAbortController = null;
+                }
+            });
+
+            cancelBtn.addEventListener('click', function() {
+                if (currentAbortController) currentAbortController.abort();
+            });
+
+            // -- Utils --
+            function showError(msg) {
+                errorCallout.textContent = msg;
+                errorCallout.style.display = 'block';
+                errorCallout.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            function hideError() {
+                errorCallout.style.display = 'none';
+            }
+
+            function animateNumber(el, target) {
+                var start = 0;
+                var duration = 800;
+                var startTime = performance.now();
+                
+                function update(now) {
+                    var elapsed = now - startTime;
+                    var progress = Math.min(elapsed / duration, 1);
+                    var current = Math.floor(progress * target);
+                    el.textContent = current;
+                    if (progress < 1) requestAnimationFrame(update);
+                }
+                requestAnimationFrame(update);
+            }
+
+            // -- copy --
+            copyBtn.addEventListener('click', async function() {
+                try {
+                    await navigator.clipboard.writeText(outputDisplay.value);
+                    var original = copyBtn.innerHTML;
+                    copyBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 8L6 11L13 4" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Copied';
+                    setTimeout(() => copyBtn.innerHTML = original, 2000);
+                } catch (e) {
+                    outputDisplay.select();
+                    document.execCommand('copy');
+                }
+            });
+
+            // -- download --
+            downloadBtn.addEventListener('click', function() {
+                var blob = new Blob([outputDisplay.value], { type: 'text/plain' });
+                var a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'llms.txt';
+                a.click();
+            });
+
+            // Enter key
+            urlInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') generateBtn.click();
+            });
+
+        })();
+    </script>
+</div>

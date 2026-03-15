@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLMs.txt Generator | AI Content Humanizer Ecosystem</title>
+    <meta name="description"
+        content="Generate a technically precise llms.txt file to optimize your site's discovery by the next generation of AI search and LLM crawlers.">
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Satoshi font via Fontshare -->
+    <link href="https://api.fontshare.com/v2/css?f[]=satoshi@700,500,400&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <header class="hero">
+            <span class="badge">BETA</span>
+            <h1>Transform Your Site's Visibility for AI Engines.</h1>
+            <p class="subtitle">Deploy an optimized llms.txt file. Secure your position in Generative Engine
+                Optimization (GEO).</p>
+        </header>
+
+        <main>
+            <section id="input-section" class="card main-card">
+                <div class="input-container">
+                    <label for="url-input" class="input-label">TARGET DOMAIN</label>
+                    <div class="input-group">
+                        <input type="url" id="url-input" placeholder="https://example.com" aria-label="Target Domain"
+                            required>
+                        <button id="generate-btn" class="btn-primary">Deploy Generator <span
+                                class="btn-icon">&rarr;</span></button>
+                        <button id="cancel-btn" class="btn-primary hidden" style="background-color: var(--error);">Cancel</button>
+                    </div>
+                </div>
+
+                <!-- Advanced Options Toggle -->
+                <div class="advanced-toggle-wrapper">
+                    <button type="button" id="advanced-toggle" class="advanced-toggle">
+                        <span class="toggle-icon" id="toggle-icon">▸</span> Advanced Crawl Options
+                    </button>
+                </div>
+
+                <div id="advanced-options" class="advanced-options hidden">
+                    <div class="options-grid">
+                        <div class="option-group">
+                            <label for="crawl-depth" class="option-label">Crawl Depth</label>
+                            <div class="option-control">
+                                <input type="range" id="crawl-depth" min="1" max="5" value="1" class="range-slider">
+                                <span id="depth-value" class="range-value">1 (Shallow)</span>
+                            </div>
+                            <p class="option-hint">Follow internal links N levels deep. Level 1 = homepage + sitemap only.</p>
+                        </div>
+
+                        <div class="option-group">
+                            <label for="max-pages" class="option-label">Max Pages</label>
+                            <div class="option-control">
+                                <input type="number" id="max-pages" min="10" max="200" value="100" class="option-input">
+                            </div>
+                            <p class="option-hint">Maximum number of pages to discover during the crawl.</p>
+                        </div>
+
+                        <div class="option-group">
+                            <label for="allow-paths" class="option-label">Allow Paths <span class="optional-tag">optional</span></label>
+                            <input type="text" id="allow-paths" placeholder="e.g. /blog, /docs" class="option-input full-width">
+                            <p class="option-hint">Only crawl pages under these path prefixes (comma-separated).</p>
+                        </div>
+
+                        <div class="option-group">
+                            <label class="option-label checkbox-label">
+                                <input type="checkbox" id="force-playwright" class="option-checkbox">
+                                <span class="checkbox-custom"></span>
+                                Force Browser Rendering
+                            </label>
+                            <p class="option-hint">Use Playwright for all pages. Slower but handles JavaScript-heavy (SPA/React) sites.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="loading-section" class="hidden">
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <div class="progress-steps">
+                        <div class="step" data-step="1">Initializing Crawler...</div>
+                        <div class="step" data-step="2">Extracting Semantic Map...</div>
+                        <div class="step" data-step="3">Generating Structured Output...</div>
+                        <div class="step" data-step="4">Finalizing llms.txt...</div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="error-section" class="hidden card error-card" style="background-color: rgba(239, 68, 68, 0.05); border-color: rgba(239, 68, 68, 0.2); margin-top: 0; margin-bottom: 24px;">
+                <div style="display: flex; align-items: flex-start; gap: 12px;">
+                    <span style="font-size: 24px; line-height: 1;">⚠️</span>
+                    <p id="error-message" style="color: var(--error); font-weight: 500; margin: 0;"></p>
+                </div>
+            </section>
+
+            <section id="output-section" class="hidden card output-card">
+                <div class="output-header">
+                    <h2>Output Ready</h2>
+                    <div class="actions">
+                        <button id="copy-btn" class="btn-secondary">Copy File</button>
+                        <button id="download-btn" class="btn-secondary">Download .txt</button>
+                    </div>
+                </div>
+
+                <!-- Meta stats bar -->
+                <div id="meta-stats" class="meta-stats hidden">
+                    <div class="stat-chip" id="stat-discovered"></div>
+                    <div class="stat-chip" id="stat-analyzed"></div>
+                    <div class="stat-chip" id="stat-depth"></div>
+                    <div class="stat-chip" id="stat-playwright"></div>
+                    <div class="stat-chip" id="stat-llm"></div>
+                </div>
+
+                <div class="code-container">
+                    <textarea id="output-display" readonly></textarea>
+                </div>
+            </section>
+
+            <section id="info-section">
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h3>GEO-First Alignment</h3>
+                        <p>Format your site architecture perfectly for LLM ingestion and RAG-based systems.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>SPA & JS Rendering</h3>
+                        <p>Playwright-powered fallback renders JavaScript-heavy sites that basic crawlers miss entirely.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Deep Crawl Engine</h3>
+                        <p>Explore up to 5 levels deep with intelligent rate limiting and optional proxy rotation.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+
+</html>

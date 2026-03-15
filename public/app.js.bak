@@ -1,0 +1,237 @@
+document.addEventListener("DOMContentLoaded", () => {
+    const generateBtn = document.getElementById("generate-btn");
+    const urlInput = document.getElementById("url-input");
+    const loadingSection = document.getElementById("loading-section");
+    const outputSection = document.getElementById("output-section");
+    const outputDisplay = document.getElementById("output-display");
+    const copyBtn = document.getElementById("copy-btn");
+    const downloadBtn = document.getElementById("download-btn");
+    const steps = document.querySelectorAll(".step");
+    const progressFill = document.getElementById("progress-fill");
+    const cancelBtn = document.getElementById("cancel-btn");
+    const errorSection = document.getElementById("error-section");
+    const errorMessage = document.getElementById("error-message");
+    
+    let currentAbortController = null;
+
+    // Advanced options
+    const advancedToggle = document.getElementById("advanced-toggle");
+    const advancedOptions = document.getElementById("advanced-options");
+    const toggleIcon = document.getElementById("toggle-icon");
+    const crawlDepthSlider = document.getElementById("crawl-depth");
+    const depthValueLabel = document.getElementById("depth-value");
+    const maxPagesInput = document.getElementById("max-pages");
+    const allowPathsInput = document.getElementById("allow-paths");
+    const forcePlaywrightCheckbox = document.getElementById("force-playwright");
+
+    // Meta stats
+    const metaStats = document.getElementById("meta-stats");
+    const statDiscovered = document.getElementById("stat-discovered");
+    const statAnalyzed = document.getElementById("stat-analyzed");
+    const statDepth = document.getElementById("stat-depth");
+    const statPlaywright = document.getElementById("stat-playwright");
+    const statLlm = document.getElementById("stat-llm");
+
+    // -----------------------------------------------------------------------
+    // Advanced options toggle
+    // -----------------------------------------------------------------------
+    const depthLabels = { 1: "1 (Shallow)", 2: "2 (Standard)", 3: "3 (Deep)", 4: "4 (Very Deep)", 5: "5 (Maximum)" };
+
+    advancedToggle.addEventListener("click", () => {
+        const isHidden = advancedOptions.classList.toggle("hidden");
+        toggleIcon.textContent = isHidden ? "▸" : "▾";
+        advancedToggle.classList.toggle("active", !isHidden);
+    });
+
+    crawlDepthSlider.addEventListener("input", () => {
+        depthValueLabel.textContent = depthLabels[crawlDepthSlider.value] || crawlDepthSlider.value;
+    });
+
+    cancelBtn.addEventListener("click", () => {
+        if (currentAbortController) {
+            currentAbortController.abort();
+        }
+    });
+
+    // -----------------------------------------------------------------------
+    // Progress step helper
+    // -----------------------------------------------------------------------
+    function updateStep(index, status) {
+        steps[index - 1].className = `step ${status}`;
+        if (status === "complete" && progressFill) {
+            progressFill.style.width = `${(index / 4) * 100}%`;
+        } else if (status === "active" && index === 1 && progressFill) {
+            progressFill.style.width = "5%";
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // Generate handler – calls our backend API
+    // -----------------------------------------------------------------------
+    generateBtn.addEventListener("click", async () => {
+        let rawUrl = urlInput.value.trim();
+        if (!rawUrl) {
+            urlInput.focus();
+            return;
+        }
+
+        // URL Validation and reflection update
+        if (!rawUrl.startsWith("http://") && !rawUrl.startsWith("https://")) {
+            rawUrl = "https://" + rawUrl;
+        }
+        try {
+            const parsed = new URL(rawUrl);
+            urlInput.value = parsed.origin;
+            rawUrl = parsed.origin;
+        } catch (err) {
+            errorSection.classList.remove("hidden");
+            errorMessage.textContent = "Please enter a valid target domain URL (e.g. https://example.com).";
+            return;
+        }
+
+        // Disable button while running
+        generateBtn.disabled = true;
+        generateBtn.classList.add("hidden");
+        cancelBtn.classList.remove("hidden");
+
+        // Reset UI
+        errorSection.classList.add("hidden");
+        loadingSection.classList.remove("hidden");
+        outputSection.classList.add("hidden");
+        metaStats.classList.add("hidden");
+        steps.forEach((s) => (s.className = "step"));
+
+        // Animate steps while waiting for the single API call
+        updateStep(1, "active");
+
+        // Start a timer that progresses the visual steps
+        let currentVisualStep = 1;
+        const stepTimer = setInterval(() => {
+            if (currentVisualStep < 4) {
+                updateStep(currentVisualStep, "complete");
+                currentVisualStep++;
+                updateStep(currentVisualStep, "active");
+            }
+        }, 3000);
+
+        // Build request body with advanced options
+        const requestBody = { url: rawUrl };
+
+        const depth = parseInt(crawlDepthSlider.value, 10);
+        if (depth > 1) requestBody.crawlDepth = depth;
+
+        const maxPages = parseInt(maxPagesInput.value, 10);
+        if (maxPages && maxPages !== 100) requestBody.maxPages = maxPages;
+
+        const allowPaths = allowPathsInput.value
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean);
+        if (allowPaths.length > 0) requestBody.allowPaths = allowPaths;
+
+        if (forcePlaywrightCheckbox.checked) requestBody.forcePlaywright = true;
+
+        currentAbortController = new AbortController();
+        const timeoutId = setTimeout(() => {
+            if (currentAbortController) currentAbortController.abort();
+        }, 180000); // 3-minute timeout
+
+        try {
+            const response = await fetch("/api/generate-llms-txt", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(requestBody),
+                signal: currentAbortController.signal
+            });
+
+            clearTimeout(timeoutId);
+
+            clearInterval(stepTimer);
+
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.error || `Server error (${response.status})`);
+            }
+
+            const data = await response.json();
+
+            // Mark all steps complete
+            for (let i = 1; i <= 4; i++) updateStep(i, "complete");
+
+            // Show results
+            outputDisplay.value = data.llmsTxt;
+            outputDisplay.removeAttribute("readonly");
+
+            // Populate meta stats
+            statDiscovered.textContent = `📄 ${data.meta.pagesDiscovered} discovered`;
+            statAnalyzed.textContent = `🔍 ${data.meta.pagesAnalyzed} analyzed`;
+            statDepth.textContent = `🕸️ Depth ${data.meta.crawlDepth || 1}`;
+            statPlaywright.textContent = `⚡ ${data.meta.playwrightPages || 0} JS-rendered`;
+            statLlm.textContent = data.meta.usedLLM ? "🤖 AI-Powered" : "🔧 Rule-Based";
+            metaStats.classList.remove("hidden");
+
+            console.log(
+                `Pages discovered: ${data.meta.pagesDiscovered}, analyzed: ${data.meta.pagesAnalyzed}, LLM used: ${data.meta.usedLLM}, Playwright: ${data.meta.playwrightPages}`
+            );
+
+            outputSection.classList.remove("hidden");
+            outputSection.scrollIntoView({ behavior: "smooth" });
+        } catch (error) {
+            if (currentAbortController) clearTimeout(timeoutId);
+            clearInterval(stepTimer);
+            for (let i = 1; i <= 4; i++) {
+                if (steps[i - 1].classList.contains("active")) {
+                    steps[i - 1].className = "step error";
+                }
+            }
+            
+            errorSection.classList.remove("hidden");
+            if (error.name === "AbortError") {
+                errorMessage.textContent = "Crawl cancelled or timed out after 3 minutes.";
+            } else {
+                errorMessage.textContent = error.message || "An unexpected error occurred.";
+            }
+            console.error(error);
+        } finally {
+            currentAbortController = null;
+            generateBtn.disabled = false;
+            generateBtn.classList.remove("hidden");
+            cancelBtn.classList.add("hidden");
+            forcePlaywrightCheckbox.checked = false; // Reset checkbox
+        }
+    });
+
+    // -----------------------------------------------------------------------
+    // Copy to Clipboard
+    // -----------------------------------------------------------------------
+    copyBtn.addEventListener("click", async () => {
+        try {
+            await navigator.clipboard.writeText(outputDisplay.value);
+            const original = copyBtn.textContent;
+            copyBtn.textContent = "Copied ✓";
+            setTimeout(() => (copyBtn.textContent = original), 2000);
+        } catch {
+            outputDisplay.select();
+            document.execCommand("copy");
+        }
+    });
+
+    // -----------------------------------------------------------------------
+    // Download .txt
+    // -----------------------------------------------------------------------
+    downloadBtn.addEventListener("click", () => {
+        const blob = new Blob([outputDisplay.value], { type: "text/plain" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "llms.txt";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(a.href);
+    });
+
+    // Allow Enter key to trigger generation
+    urlInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") generateBtn.click();
+    });
+});
